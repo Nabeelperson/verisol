@@ -23,6 +23,12 @@ namespace SolidityAST
 
             string jsonString = RunSolc(solcPath, derivedFilePath);
 
+            Console.WriteLine("Raw solc json output");
+            Console.WriteLine("How to read this voodoo: https://solidity.readthedocs.io/en/v0.6.6/using-the-compiler.html#output-description");
+            Console.WriteLine();
+            Console.WriteLine(jsonString);
+            Console.WriteLine();
+
             List<string> errors = new List<string>();
             var settings = new JsonSerializerSettings
             {
@@ -33,11 +39,13 @@ namespace SolidityAST
                 },
             };
 
-            CompilerOutput compilerOutput = JsonConvert.DeserializeObject<CompilerOutput>(jsonString);
             if (errors.Count != 0)
             {
                 throw new SystemException($"Deserialization of Solidity compiler output failed with errors: {JsonConvert.SerializeObject(errors)}");
             }
+
+            CompilerOutput compilerOutput = JsonConvert.DeserializeObject<CompilerOutput>(jsonString);
+
             return compilerOutput;
         }
 
@@ -58,11 +66,11 @@ namespace SolidityAST
             p.StartInfo.RedirectStandardError = true;
             p.StartInfo.CreateNoWindow = true;
             p.StartInfo.FileName = solcPath;
-            p.StartInfo.Arguments = $"--standard-json --allow-paths {containingDirectory}";
+            p.StartInfo.Arguments = $"--standard-json --allow-paths --old-reporter {containingDirectory}";
             p.Start();
 
             string configString = "{ \"language\": \"Solidity\", \"sources\": { %SOLPLACEHOLDER%: { \"urls\": [ %URLPLACEHOLDER% ]}},"
-                + "\"settings\": {\"evmVersion\": \"byzantium\", \"outputSelection\": {\"*\": {\"\": [ \"ast\" ]}}}}";
+                + "\"settings\": {\"evmVersion\": \"istanbul\", \"remappings\": [ \":openzeppelin-solidity/=../node_modules/openzeppelin-solidity/\" ], \"outputSelection\": {\"*\": {\"\": [ \"ast\" ]}}}}";
             configString = configString.Replace("%SOLPLACEHOLDER%", "\"" + derivedFileName + "\"" /*, StringComparison.CurrentCulture*/);
             configString = configString.Replace("%URLPLACEHOLDER%", "\"" + derivedFilePath + "\""/*, StringComparison.CurrentCulture*/);
 

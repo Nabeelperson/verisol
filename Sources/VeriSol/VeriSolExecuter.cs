@@ -353,7 +353,8 @@ namespace VeriSolRunner
         private bool ExecuteSolToBoogie()
         {
             // compile the program
-            Console.WriteLine($"... running Solc on {SolidityFilePath}");
+            Console.WriteLine($"Running Solc on {SolidityFilePath}");
+            Console.WriteLine($"Solc path:      {SolcPath}");
 
             SolidityCompiler compiler = new SolidityCompiler();
             CompilerOutput compilerOutput = compiler.Compile(SolcPath, SolidityFilePath);
